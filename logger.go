@@ -8,7 +8,6 @@ func NewLogger() *StandardLogger {
 
 	standardLogger.Formatter = &logrus.JSONFormatter{
 		FieldMap:    logrus.FieldMap{logrus.FieldKeyTime: "date"},
-		PrettyPrint: true,
 	}
 
 	standardLogger.SetReportCaller(true)
