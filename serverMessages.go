@@ -40,5 +40,5 @@ func (l *StandardLogger) HTTPServerInvalidBodyResponse(request string) {
 // InvalidDatabaseConnection prints the string "Invalid connection to the database: %s" with a Fatal error.
 // It accepts a string that could be the hostname of the database.
 func (l *StandardLogger) HTTPServerStartingError(port string) {
-	l.AddCustomFields().Errorf(httpServerStartingError, port)
+	l.AddCustomFields().Fatalf(httpServerStartingError, port)
 }

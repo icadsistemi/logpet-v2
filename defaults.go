@@ -18,7 +18,7 @@ package logpet
 // InvalidDatabaseConnection prints the string "Invalid connection to the database: %s" with a Fatal error.
 // It accepts a string that could be the hostname of the database.
 func (l *StandardLogger) InvalidDatabaseConnection(databaseHost string) {
-	l.AddCustomFields().Errorf(databaseConnectionError, databaseHost)
+	l.AddCustomFields().Fatalf(databaseConnectionError, databaseHost)
 }
 
 
