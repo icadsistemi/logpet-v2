@@ -20,6 +20,8 @@ const (
 	serverBodyInvalid = "%s sent a request but I don’t know how to read the body."
 	clientBodyInvalid = "I sent %s to %s but he can’t read it"
 	serverSendResponse = "Can't send the response, error: %s"
+	databaseAddError = "Can't add %s for %s"
+	databaseGetError = "Can't get %s for %s"
 )
 
 // ====================================

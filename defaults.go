@@ -8,6 +8,24 @@ package logpet
 //====================================
 
 
+// ====================================
+//
+// Warning Logs Messages
+//
+//====================================
+
+// DatabaseAddingError prints the string "Can't add %s for %s" with a Warning error.
+// It accepts two strings representing the entity we want to add and the user who requested it.
+func (l *StandardLogger) DatabaseAddingError(entity, user string) {
+	l.AddCustomFields().Warningf(databaseAddError, entity, user)
+}
+
+// DatabaseGetError prints the string "Can't get %s for %s" with a Warning error.
+// It accepts two strings representing the entity we want to add and the user who requested it.
+func (l *StandardLogger) DatabaseGetError(entity, user string) {
+	l.AddCustomFields().Warningf(databaseAddError, entity, user)
+}
+
 
 // ====================================
 //
