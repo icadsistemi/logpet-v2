@@ -30,6 +30,12 @@ func (l *StandardLogger) HTTPServerInvalidBodyResponse(request string) {
 	l.AddCustomFields().Warningf(serverBodyInvalid, request)
 }
 
+// HTTPServerSendResponseError prints the string "Can't send the response, error: %s" with a Warning error.
+// It accepts a string representing the error
+func (l *StandardLogger) HTTPServerSendResponseError(error string) {
+	l.AddCustomFields().Warningf(serverSendResponse, error)
+}
+
 
 // ====================================
 //

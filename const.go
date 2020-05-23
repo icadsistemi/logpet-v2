@@ -19,6 +19,7 @@ const (
 	clientStatusUnauthorized = "I’m trying to connect to %s but I’m unauthorized."
 	serverBodyInvalid = "%s sent a request but I don’t know how to read the body."
 	clientBodyInvalid = "I sent %s to %s but he can’t read it"
+	serverSendResponse = "Can't send the response, error: %s"
 )
 
 // ====================================
@@ -38,4 +39,6 @@ const (
 const (
 	httpServerStartingError = "Error starting HTTP server on port: %s"
 	databaseConnectionError = "Invalid connection to the database: %s"
+	missingEnvVar = "Missing environment variable: %s"
+	missingEntity = "Can't get: %s"
 )
