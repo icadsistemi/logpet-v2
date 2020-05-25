@@ -7,7 +7,10 @@ func NewLogger() *StandardLogger {
 	var standardLogger = &StandardLogger{logrus.New(), make(map[string]interface{})}
 
 	standardLogger.Formatter = &logrus.JSONFormatter{
-		FieldMap:    logrus.FieldMap{logrus.FieldKeyTime: "date"},
+		FieldMap:    logrus.FieldMap{
+			logrus.FieldKeyTime: "date",
+			logrus.FieldKeyMsg: "message",
+		},
 	}
 
 	standardLogger.SetReportCaller(true)
