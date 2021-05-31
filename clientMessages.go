@@ -8,7 +8,7 @@ package logpet
 
 // HTTPClientUnauthorized prints the string "I’m trying to connect to %s but I’m unauthorized." with a Warning error.
 // It accepts a string representing the server to which we made the request.
-func (l *StandardLogger) HTTPClientUnauthorized(server  string) {
+func (l *StandardLogger) HTTPClientUnauthorized(server string) {
 	l.AddCustomFields().Warningf(clientStatusUnauthorized, server)
 }
 
