@@ -1,15 +1,21 @@
 package logpet
 
-import "github.com/sirupsen/logrus"
+import (
+	"github.com/sirupsen/logrus"
+)
 
 // NewLogger initializes the standard logger
 func NewLogger() *StandardLogger {
-	var standardLogger = &StandardLogger{logrus.New(), make(map[string]interface{})}
+
+	var standardLogger = &StandardLogger{
+		Logger:       logrus.New(),
+		CustomFields: make(map[string]interface{}),
+	}
 
 	standardLogger.Formatter = &logrus.JSONFormatter{
-		FieldMap:    logrus.FieldMap{
-			logrus.FieldKeyTime: "date",
-			logrus.FieldKeyMsg: "message",
+		FieldMap: logrus.FieldMap{
+			logrus.FieldKeyTime:  "date",
+			logrus.FieldKeyMsg:   "message",
 			logrus.FieldKeyLevel: "status",
 		},
 	}
@@ -41,6 +47,6 @@ func (l *StandardLogger) ChangeFieldKeys(fieldMap logrus.FieldMap) {
 	}
 
 	l.Formatter = &logrus.JSONFormatter{
-		FieldMap:    fieldMap,
+		FieldMap: fieldMap,
 	}
 }
