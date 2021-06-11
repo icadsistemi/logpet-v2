@@ -44,7 +44,7 @@ func (l *StandardLogger) initChannel() {
 	l.LogChan = make(chan Log)
 }
 
-// SetDebugMode assign the provided valute to the client, if true sends and prints to stdout debug logs
+// SetDebugMode assign the provided value to the client, if true sends and prints to stdout debug logs
 func (l *StandardLogger) SetDebugMode(debug bool) {
 	l.sendDebugLogs = debug
 }
