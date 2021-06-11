@@ -20,7 +20,7 @@ func (l *StandardLogger) HTTPServerStarted(port string) {
 
 // HTTPServerUnauthorizedResponse prints the string "%s tried to connect on resource: %s, but it’s unauthorized." with a Warning error.
 // It accepts two strings representing the host that made the request and the resource that it wants.
-func (l *StandardLogger) HTTPServerUnauthorizedResponse(request, resource  string) {
+func (l *StandardLogger) HTTPServerUnauthorizedResponse(request, resource string) {
 	l.AddCustomFields().Warningf(serverStatusUnauthorized, request, resource)
 }
 
@@ -35,7 +35,6 @@ func (l *StandardLogger) HTTPServerInvalidBodyResponse(request string) {
 func (l *StandardLogger) HTTPServerSendResponseError(error string) {
 	l.AddCustomFields().Warningf(serverSendResponse, error)
 }
-
 
 // ====================================
 //
