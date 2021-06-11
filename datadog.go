@@ -14,14 +14,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey string, sendDebugLogs bool) error {
+func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey string, sendDebugLogs, localmode bool) error {
 
 	// if provided endpoint is empty we fallback to the default one
 	if datadogEndpoint == "" {
 		datadogEndpoint = DataDogDefaultEndpoint
 	}
 
-	if datadogAPIKey == "" {
+	if datadogAPIKey == "" && !localmode {
 		return fmt.Errorf("no API Key provided")
 	}
 
@@ -30,6 +30,9 @@ func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey strin
 
 	// set debug mode with provided value
 	l.SetDebugMode(sendDebugLogs)
+
+	// enable local mode based on provided value
+	l.EnableLocalMode(localmode)
 
 	l.ddAPIKey = datadogAPIKey
 	l.ddEndpoint = datadogEndpoint
@@ -42,6 +45,11 @@ func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey strin
 
 func (l *StandardLogger) initChannel() {
 	l.LogChan = make(chan Log)
+}
+
+// EnableLocalMode assign the provided value to the client, if true it only prints log lines to the stdout
+func (l *StandardLogger) EnableLocalMode(local bool) {
+	l.localMode = local
 }
 
 // SetDebugMode assign the provided value to the client, if true sends and prints to stdout debug logs
@@ -107,15 +115,8 @@ func (l *StandardLogger) startLogRoutineListener() {
 		newLog.Level = logElem.Level
 		newLog.Time = time.Now()
 
-		// Performing http request to datadog
-		err := l.sendLogToDD(newLog, &httpClient)
-		if err != nil {
-			log.Printf("unable to send log to DataDog, %v", err)
-			continue
-		}
-
 		// If sendDebugLogs is true print the log with Println
-		if l.sendDebugLogs {
+		if l.sendDebugLogs || l.localMode {
 			logBytes, err := newLog.Bytes()
 			if err != nil {
 				l.SendWarnLog(fmt.Sprintf("error converting log to bytes %v", err))
@@ -123,6 +124,15 @@ func (l *StandardLogger) startLogRoutineListener() {
 			}
 
 			fmt.Println(string(logBytes))
+		}
+
+		// Performing http request to datadog
+		if !l.localMode {
+			err := l.sendLogToDD(newLog, &httpClient)
+			if err != nil {
+				log.Printf("unable to send log to DataDog, %v", err)
+				continue
+			}
 		}
 
 		// If it's a fatal log exit

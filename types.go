@@ -10,6 +10,7 @@ type StandardLogger struct {
 	ddAPIKey      string
 	ddEndpoint    string
 	sendDebugLogs bool
+	localMode     bool
 }
 
 // Log is a type containing log message and level
