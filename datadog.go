@@ -25,7 +25,10 @@ func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey strin
 		return fmt.Errorf("no API Key provided")
 	}
 
+	// initialize log channel
 	l.initChannel()
+
+	// set debug mode with provided value
 	l.SetDebugMode(sendDebugLogs)
 
 	l.ddAPIKey = datadogAPIKey
@@ -41,10 +44,12 @@ func (l *StandardLogger) initChannel() {
 	l.LogChan = make(chan Log)
 }
 
+// SetDebugMode assign the provided valute to the client, if true sends and prints to stdout debug logs
 func (l *StandardLogger) SetDebugMode(debug bool) {
 	l.sendDebugLogs = debug
 }
 
+// SendInfoLog sends a log with info level to the log channel
 func (l *StandardLogger) SendInfoLog(message string) {
 	l.LogChan <- Log{
 		Message: message,
@@ -52,6 +57,7 @@ func (l *StandardLogger) SendInfoLog(message string) {
 	}
 }
 
+// SendWarnLog sends a log with warning level to the log channel
 func (l *StandardLogger) SendWarnLog(message string) {
 	l.LogChan <- Log{
 		Message: message,
@@ -59,6 +65,7 @@ func (l *StandardLogger) SendWarnLog(message string) {
 	}
 }
 
+// SendErrLog sends a log with error level to the log channel
 func (l *StandardLogger) SendErrLog(message string) {
 	l.LogChan <- Log{
 		Message: message,
@@ -66,6 +73,7 @@ func (l *StandardLogger) SendErrLog(message string) {
 	}
 }
 
+// SendDebugLog sends a log with debug level to the log channel
 func (l *StandardLogger) SendDebugLog(message string) {
 	l.LogChan <- Log{
 		Message: message,
@@ -73,6 +81,7 @@ func (l *StandardLogger) SendDebugLog(message string) {
 	}
 }
 
+// SendFatalLog sends a log with fatal level to the log channel
 func (l *StandardLogger) SendFatalLog(message string) {
 	l.LogChan <- Log{
 		Message: message,
@@ -80,6 +89,7 @@ func (l *StandardLogger) SendFatalLog(message string) {
 	}
 }
 
+// startLogRoutineListener handles the incoming logs
 func (l *StandardLogger) startLogRoutineListener() {
 	var logWriter io.Writer
 	var httpClient http.Client
@@ -87,6 +97,7 @@ func (l *StandardLogger) startLogRoutineListener() {
 
 	for logElem := range l.LogChan {
 
+		// ignore debug log if sendDebugLog is set to false
 		if !l.sendDebugLogs && logElem.Level == logrus.DebugLevel {
 			continue
 		}
@@ -96,12 +107,14 @@ func (l *StandardLogger) startLogRoutineListener() {
 		newLog.Level = logElem.Level
 		newLog.Time = time.Now()
 
+		// Performing http request to datadog
 		err := l.sendLogToDD(newLog, &httpClient)
 		if err != nil {
 			log.Printf("unable to send log to DataDog, %v", err)
 			continue
 		}
 
+		// If sendDebugLogs is true print the log with Println
 		if l.sendDebugLogs {
 			logBytes, err := newLog.Bytes()
 			if err != nil {
@@ -112,6 +125,7 @@ func (l *StandardLogger) startLogRoutineListener() {
 			fmt.Println(string(logBytes))
 		}
 
+		// If it's a fatal log exit
 		if logElem.Level == logrus.FatalLevel {
 			os.Exit(1)
 		}
