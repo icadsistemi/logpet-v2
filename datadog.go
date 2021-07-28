@@ -121,7 +121,7 @@ func (l *StandardLogger) startLogRoutineListener() {
 		newLog.Time = time.Now()
 
 		if logElem.CustomHostname != "" {
-			newLog.Data["hostname"] = logElem.CustomHostname
+			newLog.Data["host"] = logElem.CustomHostname
 		}
 
 		// If sendDebugLogs is true print the log with Println
