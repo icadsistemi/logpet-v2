@@ -15,6 +15,7 @@ type StandardLogger struct {
 
 // Log is a type containing log message and level
 type Log struct {
-	Message string
-	Level   logrus.Level
+	Message        string
+	CustomHostname string
+	Level          logrus.Level
 }

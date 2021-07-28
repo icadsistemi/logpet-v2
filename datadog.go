@@ -58,42 +58,47 @@ func (l *StandardLogger) SetDebugMode(debug bool) {
 }
 
 // SendInfoLog sends a log with info level to the log channel
-func (l *StandardLogger) SendInfoLog(message string) {
+func (l *StandardLogger) SendInfoLog(message, customhostname string) {
 	l.LogChan <- Log{
-		Message: message,
-		Level:   logrus.InfoLevel,
+		Message:        message,
+		CustomHostname: customhostname,
+		Level:          logrus.InfoLevel,
 	}
 }
 
 // SendWarnLog sends a log with warning level to the log channel
-func (l *StandardLogger) SendWarnLog(message string) {
+func (l *StandardLogger) SendWarnLog(message, customhostname string) {
 	l.LogChan <- Log{
-		Message: message,
-		Level:   logrus.WarnLevel,
+		Message:        message,
+		CustomHostname: customhostname,
+		Level:          logrus.WarnLevel,
 	}
 }
 
 // SendErrLog sends a log with error level to the log channel
-func (l *StandardLogger) SendErrLog(message string) {
+func (l *StandardLogger) SendErrLog(message, customhostname string) {
 	l.LogChan <- Log{
-		Message: message,
-		Level:   logrus.ErrorLevel,
+		Message:        message,
+		CustomHostname: customhostname,
+		Level:          logrus.ErrorLevel,
 	}
 }
 
 // SendDebugLog sends a log with debug level to the log channel
-func (l *StandardLogger) SendDebugLog(message string) {
+func (l *StandardLogger) SendDebugLog(message, customhostname string) {
 	l.LogChan <- Log{
-		Message: message,
-		Level:   logrus.DebugLevel,
+		Message:        message,
+		CustomHostname: customhostname,
+		Level:          logrus.DebugLevel,
 	}
 }
 
 // SendFatalLog sends a log with fatal level to the log channel
-func (l *StandardLogger) SendFatalLog(message string) {
+func (l *StandardLogger) SendFatalLog(message, customhostname string) {
 	l.LogChan <- Log{
-		Message: message,
-		Level:   logrus.FatalLevel,
+		Message:        message,
+		CustomHostname: customhostname,
+		Level:          logrus.FatalLevel,
 	}
 }
 
@@ -115,11 +120,15 @@ func (l *StandardLogger) startLogRoutineListener() {
 		newLog.Level = logElem.Level
 		newLog.Time = time.Now()
 
+		if logElem.CustomHostname != "" {
+			newLog.Data["hostname"] = logElem.CustomHostname
+		}
+
 		// If sendDebugLogs is true print the log with Println
 		if l.sendDebugLogs || l.localMode {
 			logBytes, err := newLog.Bytes()
 			if err != nil {
-				l.SendWarnLog(fmt.Sprintf("error converting log to bytes %v", err))
+				l.SendWarnLog(fmt.Sprintf("error converting log to bytes %v", err), "")
 				continue
 			}
 
