@@ -68,7 +68,7 @@ func (l *StandardLogger) SendInfoLog(message, customhostname string) {
 
 // SendInfofLog sends a formatted log with info level to the log channel
 func (l *StandardLogger) SendInfofLog(message, customhostname string, args ...interface{}) {
-	l.SendInfoLog(fmt.Sprintf(message, args), customhostname)
+	l.SendInfoLog(fmt.Sprintf(message, args...), customhostname)
 }
 
 // SendWarnLog sends a log with warning level to the log channel
@@ -82,7 +82,7 @@ func (l *StandardLogger) SendWarnLog(message, customhostname string) {
 
 // SendWarnfLog sends a formatted log with warn level to the log channel
 func (l *StandardLogger) SendWarnfLog(message, customhostname string, args ...interface{}) {
-	l.SendWarnLog(fmt.Sprintf(message, args), customhostname)
+	l.SendWarnLog(fmt.Sprintf(message, args...), customhostname)
 }
 
 // SendErrLog sends a log with error level to the log channel
@@ -96,7 +96,7 @@ func (l *StandardLogger) SendErrLog(message, customhostname string) {
 
 // SendErrfLog sends a formatted log with error level to the log channel
 func (l *StandardLogger) SendErrfLog(message, customhostname string, args ...interface{}) {
-	l.SendErrLog(fmt.Sprintf(message, args), customhostname)
+	l.SendErrLog(fmt.Sprintf(message, args...), customhostname)
 }
 
 // SendDebugLog sends a log with debug level to the log channel
@@ -110,7 +110,7 @@ func (l *StandardLogger) SendDebugLog(message, customhostname string) {
 
 // SendDebugfLog sends a formatted log with debug level to the log channel
 func (l *StandardLogger) SendDebugfLog(message, customhostname string, args ...interface{}) {
-	l.SendDebugLog(fmt.Sprintf(message, args), customhostname)
+	l.SendDebugLog(fmt.Sprintf(message, args...), customhostname)
 }
 
 // SendFatalLog sends a log with fatal level to the log channel
@@ -124,7 +124,7 @@ func (l *StandardLogger) SendFatalLog(message, customhostname string) {
 
 // SendFatalfLog sends a formatted log with fatal level to the log channel
 func (l *StandardLogger) SendFatalfLog(message, customhostname string, args ...interface{}) {
-	l.SendFatalLog(fmt.Sprintf(message, args), customhostname)
+	l.SendFatalLog(fmt.Sprintf(message, args...), customhostname)
 }
 
 // startLogRoutineListener handles the incoming logs
