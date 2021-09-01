@@ -25,8 +25,10 @@ func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey strin
 		return fmt.Errorf("no API Key provided")
 	}
 
-	// initialize log channel
-	l.initChannel()
+	// initialize log channel only if it doesn't exist so we don't create multiple channels
+	if l.logChan == nil {
+		l.initChannel()
+	}
 
 	// set debug mode with provided value
 	l.SetDebugMode(sendDebugLogs)
@@ -34,8 +36,9 @@ func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey strin
 	// enable local mode based on provided value
 	l.EnableLocalMode(localmode)
 
-	l.ddAPIKey = datadogAPIKey
-	l.ddEndpoint = datadogEndpoint
+	l.SetDataDogAPIKey(datadogAPIKey)
+
+	l.SetDataDogEndpoint(datadogEndpoint)
 
 	// starting log routine
 	go l.startLogRoutineListener()
@@ -44,7 +47,7 @@ func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey strin
 }
 
 func (l *StandardLogger) initChannel() {
-	l.LogChan = make(chan Log)
+	l.logChan = make(chan Log)
 }
 
 // EnableLocalMode assign the provided value to the client, if true it only prints log lines to the stdout
@@ -57,9 +60,19 @@ func (l *StandardLogger) SetDebugMode(debug bool) {
 	l.sendDebugLogs = debug
 }
 
+// SetDataDogEndpoint assign the provided datadog endpoint value to the client
+func (l *StandardLogger) SetDataDogEndpoint(endpoint string) {
+	l.ddEndpoint = endpoint
+}
+
+// SetDataDogAPIKey assign the provided datadog API Key value to the client
+func (l *StandardLogger) SetDataDogAPIKey(APIKey string) {
+	l.ddAPIKey = APIKey
+}
+
 // SendInfoLog sends a log with info level to the log channel
 func (l *StandardLogger) SendInfoLog(message, customhostname string) {
-	l.LogChan <- Log{
+	l.logChan <- Log{
 		Message:        message,
 		CustomHostname: customhostname,
 		Level:          logrus.InfoLevel,
@@ -73,7 +86,7 @@ func (l *StandardLogger) SendInfofLog(message, customhostname string, args ...in
 
 // SendWarnLog sends a log with warning level to the log channel
 func (l *StandardLogger) SendWarnLog(message, customhostname string) {
-	l.LogChan <- Log{
+	l.logChan <- Log{
 		Message:        message,
 		CustomHostname: customhostname,
 		Level:          logrus.WarnLevel,
@@ -87,7 +100,7 @@ func (l *StandardLogger) SendWarnfLog(message, customhostname string, args ...in
 
 // SendErrLog sends a log with error level to the log channel
 func (l *StandardLogger) SendErrLog(message, customhostname string) {
-	l.LogChan <- Log{
+	l.logChan <- Log{
 		Message:        message,
 		CustomHostname: customhostname,
 		Level:          logrus.ErrorLevel,
@@ -101,7 +114,7 @@ func (l *StandardLogger) SendErrfLog(message, customhostname string, args ...int
 
 // SendDebugLog sends a log with debug level to the log channel
 func (l *StandardLogger) SendDebugLog(message, customhostname string) {
-	l.LogChan <- Log{
+	l.logChan <- Log{
 		Message:        message,
 		CustomHostname: customhostname,
 		Level:          logrus.DebugLevel,
@@ -115,7 +128,7 @@ func (l *StandardLogger) SendDebugfLog(message, customhostname string, args ...i
 
 // SendFatalLog sends a log with fatal level to the log channel
 func (l *StandardLogger) SendFatalLog(message, customhostname string) {
-	l.LogChan <- Log{
+	l.logChan <- Log{
 		Message:        message,
 		CustomHostname: customhostname,
 		Level:          logrus.FatalLevel,
@@ -133,7 +146,7 @@ func (l *StandardLogger) startLogRoutineListener() {
 	var httpClient http.Client
 	l.SetOutput(logWriter)
 
-	for logElem := range l.LogChan {
+	for logElem := range l.logChan {
 
 		// ignore debug log if sendDebugLog is set to false
 		if !l.sendDebugLogs && logElem.Level == logrus.DebugLevel {
