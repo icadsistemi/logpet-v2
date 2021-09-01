@@ -6,7 +6,7 @@ import "github.com/sirupsen/logrus"
 type StandardLogger struct {
 	*logrus.Logger
 	CustomFields  map[string]interface{}
-	LogChan       chan Log
+	logChan       chan Log
 	ddAPIKey      string
 	ddEndpoint    string
 	sendDebugLogs bool
