@@ -14,7 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey string, sendDebugLogs, localmode bool) error {
+func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey string, sendDebugLogs, localmode bool, httpClient *http.Client) error {
 
 	// if provided endpoint is empty we fallback to the default one
 	if datadogEndpoint == "" {
@@ -39,6 +39,12 @@ func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey strin
 	l.SetDataDogAPIKey(datadogAPIKey)
 
 	l.SetDataDogEndpoint(datadogEndpoint)
+
+	if httpClient != nil {
+		l.httpClient = httpClient
+	} else {
+		l.httpClient = &http.Client{}
+	}
 
 	// starting log routine
 	go l.startLogRoutineListener()
@@ -143,7 +149,7 @@ func (l *StandardLogger) SendFatalfLog(message, customhostname string, args ...i
 // startLogRoutineListener handles the incoming logs
 func (l *StandardLogger) startLogRoutineListener() {
 	var logWriter io.Writer
-	var httpClient http.Client
+	// var httpClient http.Client
 	l.SetOutput(logWriter)
 
 	for logElem := range l.logChan {
@@ -175,7 +181,7 @@ func (l *StandardLogger) startLogRoutineListener() {
 
 		// Performing http request to datadog
 		if !l.localMode {
-			err := l.sendLogToDD(newLog, &httpClient)
+			err := l.sendLogToDD(newLog, l.httpClient)
 			if err != nil {
 				log.Printf("unable to send log to DataDog, %v", err)
 				continue

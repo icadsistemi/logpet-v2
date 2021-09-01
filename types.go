@@ -1,6 +1,10 @@
 package logpet
 
-import "github.com/sirupsen/logrus"
+import (
+	"net/http"
+
+	"github.com/sirupsen/logrus"
+)
 
 // StandardLogger is a new type useful to add new methods for default log formats.
 type StandardLogger struct {
@@ -11,6 +15,7 @@ type StandardLogger struct {
 	ddEndpoint    string
 	sendDebugLogs bool
 	localMode     bool
+	httpClient    *http.Client
 }
 
 // Log is a type containing log message and level
