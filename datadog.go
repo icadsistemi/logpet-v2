@@ -14,7 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey string, sendDebugLogs, localmode bool, httpClient *http.Client) error {
+func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey string, sendDebugLogs, localmode bool) error {
 
 	// if provided endpoint is empty we fallback to the default one
 	if datadogEndpoint == "" {
@@ -40,11 +40,7 @@ func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey strin
 
 	l.SetDataDogEndpoint(datadogEndpoint)
 
-	if httpClient != nil {
-		l.httpClient = httpClient
-	} else {
-		l.httpClient = &http.Client{}
-	}
+	l.httpClient = &http.Client{}
 
 	// starting log routine
 	go l.startLogRoutineListener()
@@ -74,6 +70,16 @@ func (l *StandardLogger) SetDataDogEndpoint(endpoint string) {
 // SetDataDogAPIKey assign the provided datadog API Key value to the client
 func (l *StandardLogger) SetDataDogAPIKey(APIKey string) {
 	l.ddAPIKey = APIKey
+}
+
+// SetUpCustomHTTPClient assign the provided http client to the client
+func (l *StandardLogger) SetUpCustomHTTPClient(httpClient *http.Client) error {
+	if httpClient != nil {
+		l.httpClient = httpClient
+		return nil
+	}
+
+	return errors.New("nil http client provided")
 }
 
 // SendInfoLog sends a log with info level to the log channel
