@@ -170,6 +170,8 @@ func (l *StandardLogger) startLogRoutineListener() {
 		newLog.Level = logElem.Level
 		newLog.Time = time.Now()
 
+		newLog.Data["ddsource"] = "logpet"
+
 		for key, value := range logElem.CustomFields {
 			newLog.Data[key] = value
 		}
