@@ -14,7 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey string, sendDebugLogs, localmode bool) error {
+func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey, offlineLogsPath string, sendDebugLogs, localmode bool) error {
 
 	// if provided endpoint is empty we fallback to the default one
 	if datadogEndpoint == "" {
@@ -28,6 +28,12 @@ func (l *StandardLogger) SetupDataDogLogger(datadogEndpoint, datadogAPIKey strin
 	// initialize log channel only if it doesn't exist so we don't create multiple channels
 	if l.logChan == nil {
 		l.initChannel()
+	}
+
+	// offline logs path
+	if offlineLogsPath != "" {
+		l.offlineLogsPath = offlineLogsPath
+		l.EnableOfflineLogs(true)
 	}
 
 	// set debug mode with provided value
@@ -83,79 +89,88 @@ func (l *StandardLogger) SetUpCustomHTTPClient(httpClient *http.Client) error {
 }
 
 // SendInfoLog sends a log with info level to the log channel
-func (l *StandardLogger) SendInfoLog(message string, customFields map[string]string) {
-	l.logChan <- Log{
-		Message:      message,
-		CustomFields: customFields,
-		Level:        logrus.InfoLevel,
-	}
+func (l *StandardLogger) SendInfoLog(message string, customFields map[string]interface{}) {
+	go func() {
+		l.logChan <- Log{
+			Message:      message,
+			CustomFields: customFields,
+			Level:        logrus.InfoLevel,
+		}
+	}()
 }
 
 // SendInfofLog sends a formatted log with info level to the log channel
-func (l *StandardLogger) SendInfofLog(message string, customFields map[string]string, args ...interface{}) {
+func (l *StandardLogger) SendInfofLog(message string, customFields map[string]interface{}, args ...interface{}) {
 	l.SendInfoLog(fmt.Sprintf(message, args...), customFields)
 }
 
 // SendWarnLog sends a log with warning level to the log channel
-func (l *StandardLogger) SendWarnLog(message string, customFields map[string]string) {
-	l.logChan <- Log{
-		Message:      message,
-		CustomFields: customFields,
-		Level:        logrus.WarnLevel,
-	}
+func (l *StandardLogger) SendWarnLog(message string, customFields map[string]interface{}) {
+	go func() {
+		l.logChan <- Log{
+			Message:      message,
+			CustomFields: customFields,
+			Level:        logrus.WarnLevel,
+		}
+	}()
 }
 
 // SendWarnfLog sends a formatted log with warn level to the log channel
-func (l *StandardLogger) SendWarnfLog(message string, customFields map[string]string, args ...interface{}) {
+func (l *StandardLogger) SendWarnfLog(message string, customFields map[string]interface{}, args ...interface{}) {
 	l.SendWarnLog(fmt.Sprintf(message, args...), customFields)
 }
 
 // SendErrLog sends a log with error level to the log channel
-func (l *StandardLogger) SendErrLog(message string, customFields map[string]string) {
-	l.logChan <- Log{
-		Message:      message,
-		CustomFields: customFields,
-		Level:        logrus.ErrorLevel,
-	}
+func (l *StandardLogger) SendErrLog(message string, customFields map[string]interface{}) {
+	go func() {
+		l.logChan <- Log{
+			Message:      message,
+			CustomFields: customFields,
+			Level:        logrus.ErrorLevel,
+		}
+	}()
 }
 
 // SendErrfLog sends a formatted log with error level to the log channel
-func (l *StandardLogger) SendErrfLog(message string, customFields map[string]string, args ...interface{}) {
+func (l *StandardLogger) SendErrfLog(message string, customFields map[string]interface{}, args ...interface{}) {
 	l.SendErrLog(fmt.Sprintf(message, args...), customFields)
 }
 
 // SendDebugLog sends a log with debug level to the log channel
-func (l *StandardLogger) SendDebugLog(message string, customFields map[string]string) {
-	l.logChan <- Log{
-		Message:      message,
-		CustomFields: customFields,
-		Level:        logrus.DebugLevel,
-	}
+func (l *StandardLogger) SendDebugLog(message string, customFields map[string]interface{}) {
+	go func() {
+		l.logChan <- Log{
+			Message:      message,
+			CustomFields: customFields,
+			Level:        logrus.DebugLevel,
+		}
+	}()
 }
 
 // SendDebugfLog sends a formatted log with debug level to the log channel
-func (l *StandardLogger) SendDebugfLog(message string, customFields map[string]string, args ...interface{}) {
+func (l *StandardLogger) SendDebugfLog(message string, customFields map[string]interface{}, args ...interface{}) {
 	l.SendDebugLog(fmt.Sprintf(message, args...), customFields)
 }
 
 // SendFatalLog sends a log with fatal level to the log channel
-func (l *StandardLogger) SendFatalLog(message string, customFields map[string]string) {
-	l.logChan <- Log{
-		Message:      message,
-		CustomFields: customFields,
-		Level:        logrus.FatalLevel,
-	}
+func (l *StandardLogger) SendFatalLog(message string, customFields map[string]interface{}) {
+	func() {
+		l.logChan <- Log{
+			Message:      message,
+			CustomFields: customFields,
+			Level:        logrus.FatalLevel,
+		}
+	}()
 }
 
 // SendFatalfLog sends a formatted log with fatal level to the log channel
-func (l *StandardLogger) SendFatalfLog(message string, customFields map[string]string, args ...interface{}) {
+func (l *StandardLogger) SendFatalfLog(message string, customFields map[string]interface{}, args ...interface{}) {
 	l.SendFatalLog(fmt.Sprintf(message, args...), customFields)
 }
 
 // startLogRoutineListener handles the incoming logs
 func (l *StandardLogger) startLogRoutineListener() {
 	var logWriter io.Writer
-	// var httpClient http.Client
 	l.SetOutput(logWriter)
 
 	for logElem := range l.logChan {
@@ -176,22 +191,36 @@ func (l *StandardLogger) startLogRoutineListener() {
 			newLog.Data[key] = value
 		}
 
-		// If sendDebugLogs is true print the log with Println
-		if l.sendDebugLogs || l.localMode {
-			logBytes, err := newLog.Bytes()
-			if err != nil {
-				l.SendWarnLog(fmt.Sprintf("error converting log to bytes %v", err), nil)
-				continue
-			}
-
-			fmt.Println(string(logBytes))
+		logBytes, err := newLog.Bytes()
+		if err != nil {
+			l.SendWarnLog(fmt.Sprintf("error converting log to bytes %v", err), nil)
+			continue
 		}
 
-		// Performing http request to datadog
-		if !l.localMode {
+		// If localMode is true print the log with Println
+		if l.localMode {
+			fmt.Println(string(logBytes))
+		} else {
 			err := l.sendLogToDD(newLog, l.httpClient)
 			if err != nil {
 				log.Printf("unable to send log to DataDog, %v", err)
+				if l.saveOfflineLogs {
+					var offsaveErr error
+
+					newLog.Message = fmt.Sprintf("OFFLINE LOG at %v | %s", time.Now().String(), newLog.Message)
+
+					logBytes, offsaveErr = newLog.Bytes()
+					if err != nil {
+						l.SendWarnLog(fmt.Sprintf("error converting log to bytes %v", offsaveErr), nil)
+						continue
+					}
+
+					offsaveErr = l.saveLogToFile(logBytes, fmt.Sprintf("log-%s.json", time.Now().Format(time.RFC3339Nano)))
+					if offsaveErr != nil {
+						fmt.Println(offsaveErr)
+					}
+				}
+
 				continue
 			}
 		}
