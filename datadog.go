@@ -210,7 +210,7 @@ func (l *StandardLogger) startLogRoutineListener() {
 					newLog.Message = fmt.Sprintf("OFFLINE LOG at %v | %s", time.Now().String(), newLog.Message)
 
 					logBytes, offsaveErr = newLog.Bytes()
-					if err != nil {
+					if offsaveErr != nil {
 						l.SendWarnLog(fmt.Sprintf("error converting log to bytes %v", offsaveErr), nil)
 						continue
 					}
