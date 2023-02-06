@@ -16,11 +16,18 @@ func (l *StandardLogger) LogAPIGatewayProxyRequest(event events.APIGatewayProxyR
 	email, _ := ReadEmailFromAPIGatewayProxyRequestEvent(event)
 
 	// Remove Bearer token from headers before logging
-	delete(event.Headers, "Authorization")
+	headers := make(map[string]string, len(event.Headers))
+
+	for key, value := range event.Headers {
+		if key == "Authorization" {
+			continue
+		}
+		headers[key] = value
+	}
 
 	l.CustomFields["http.query_parameters"] = event.QueryStringParameters
 	l.CustomFields["http.path_parameters"] = event.PathParameters
-	l.CustomFields["http.headers"] = event.Headers
+	l.CustomFields["http.headers"] = headers
 	l.CustomFields["http.method"] = event.HTTPMethod
 	l.CustomFields["http.url"] = event.Path
 	l.CustomFields["user.name"] = email
