@@ -10,7 +10,7 @@ func (l *StandardLogger) LogAPIGatewayProxyRequest(event events.APIGatewayProxyR
 	var message = "Received API Gateway Proxy Request."
 
 	if event.Body != "" {
-		message = fmt.Sprintf("%s Body: %s - ", message, event.Body)
+		l.CustomFields["http.body"] = event.Body
 	}
 
 	email, _ := ReadEmailFromAPIGatewayProxyRequestEvent(event)
