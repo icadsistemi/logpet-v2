@@ -30,5 +30,5 @@ func (l *StandardLogger) SendGinRequestLog(ctx *gin.Context, body interface{}) {
 	customFields["http.query_parameters"] = ctx.Request.URL.RawQuery
 	customFields["http.path_parameters"] = ctx.Request.URL.Path
 
-	l.SendInfofLog("New request received", customFields)
+	l.SendDebugfLog("New request received", customFields)
 }
