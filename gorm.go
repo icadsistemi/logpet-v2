@@ -15,7 +15,9 @@ type GormLogger struct {
 	Logger *StandardLogger
 }
 
-func (g GormLogger) LogMode(logger.LogLevel) {}
+func (g GormLogger) LogMode(logger.LogLevel) GormLogger {
+	return g
+}
 
 func (g GormLogger) Info(context.Context, string, ...interface{}) {
 
