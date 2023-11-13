@@ -1,4 +1,4 @@
-module github.com/icadsistemi/logpet
+module github.com/icadsistemi/logpet-v2
 
 go 1.13
 
