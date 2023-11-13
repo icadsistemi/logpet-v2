@@ -20,13 +20,13 @@ func (g GormLogger) LogMode(logger.LogLevel) logger.Interface {
 }
 
 func (g GormLogger) Info(ctx context.Context, msg string, data ...interface{}) {
-	g.Logger.SendDebugfLog("%s", nil, msg)
+	g.Logger.SendDebugfLog("%s - %+v", nil, msg, data)
 }
-func (g GormLogger) Warn(context.Context, string, ...interface{}) {
-
+func (g GormLogger) Warn(ctx context.Context, msg string, data ...interface{}) {
+	g.Logger.SendDebugfLog("%s - %+v", nil, msg, data)
 }
-func (g GormLogger) Error(context.Context, string, ...interface{}) {
-
+func (g GormLogger) Error(ctx context.Context, msg string, data ...interface{}) {
+	g.Logger.SendDebugfLog("%s - %+v", nil, msg, data)
 }
 
 func (g GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
